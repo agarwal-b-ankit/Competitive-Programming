@@ -23,12 +23,23 @@ using namespace __gnu_pbds;
 #define forn(i,a,b) for(i=a;i<b;i++)
 #define tr(container, it) for(typeof(container.begin()) it = container.begin(); it != container.end(); it++)
 ll INF=numeric_limits<ll>::max();
-const ll MAXN=100010;
+const ll MAXN=200010;
 
-ll bit[MAXN],a[MAXN];
+ll po(ll n, ll p, ll MOD){
+    if(p==0 || n==1) return 1;
+    ll ans=po(n,p/2,MOD);
+    if(p%2==0) return (ans*ans)%MOD;
+    else return (n*((ans*ans)%MOD))%MOD;
+}
+
+ll modInv(ll a, ll MOD){
+    return po(a,MOD-2,MOD);
+}
+
+ll bit[MAXN],fact[MAXN];
 
 void update(ll ind, ll val){
-    while(ind<MAXN){
+    while(ind<=MAXN){
         bit[ind]+=val;
         ind+= ind&(-ind);
     }
@@ -43,15 +54,42 @@ ll query(ll ind){
     return sum;
 }
 
+void processFact(ll n){
+    fact[1]=1;
+    for(ll i=2;i<=n;i++)
+        fact[i]=(fact[i-1]*i)%mod;
+}
+
+ll cal(ll a, ll b, ll c, ll m){
+    return ((((a%m)*(b%m))%m)*modInv(c,m))%m;
+}
+
+ll getRank(vector<ll> &a){
+    processFact(MAXN);
+    memset(bit,0,sizeof(bit));
+    map<ll,ll> fre;
+    ll i,n=a.size();
+    for(i=0;i<n;i++)
+	    fre[a[i]]++;
+	ll tot=fact[n],ans=0;
+	for(auto e:fre){
+	    update(e.ff,e.ss);
+	    tot=cal(tot,1,fact[e.ss],mod);
+	}
+	for(i=0;i<n;i++){
+	    ll sum=query(a[i]-1);
+	    ans=(ans+cal(tot,sum,n-i,mod))%mod;
+        tot=cal(tot,fre[a[i]],n-i,mod);
+	    update(a[i],-1);
+	    fre[a[i]]--;
+	}
+	return (ans+1)%mod;
+}
+
 int main()
 {
-	//FastIO
-	ll t,n,i;
-	ll temp[]={1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-	n=12;
-	for(i=1;i<=n;i++) update(i,temp[i-1]);
-	cout<<query(5)<<endl;
-	update(5,5);
-	cout<<query(5)<<endl;
+	FastIO
+	vector<ll> a{4, 4, 2, 2, 1};
+    cout<<getRank(a)<<"\n";
 	return 0;
 }
