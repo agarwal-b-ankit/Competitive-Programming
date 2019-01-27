@@ -64,14 +64,14 @@ ll cal(ll a, ll b, ll c, ll m){
     return ((((a%m)*(b%m))%m)*modInv(c,m))%m;
 }
 
-ll getRank(vector<ll> &a){
+ll getRankWithRepetition(vector<ll> &a){
     processFact(MAXN);
     memset(bit,0,sizeof(bit));
     map<ll,ll> fre;
     ll i,n=a.size();
     for(i=0;i<n;i++)
 	    fre[a[i]]++;
-	ll tot=fact[n],ans=0;
+	ll tot=fact[n],ans=1;
 	for(auto e:fre){
 	    update(e.ff,e.ss);
 	    tot=cal(tot,1,fact[e.ss],mod);
@@ -83,13 +83,29 @@ ll getRank(vector<ll> &a){
 	    update(a[i],-1);
 	    fre[a[i]]--;
 	}
-	return (ans+1)%mod;
+	return ans;
+}
+
+ll getRankWithoutRepetition(vector<ll> &a){
+    processFact(MAXN);
+    memset(bit,0,sizeof(bit));
+    ll i,n=a.size(),ans=1;
+	for(i=0;i<n;i++)
+	    update(a[i],1);
+	for(i=0;i<n;i++){
+	    ll sum=query(a[i]-1);
+	    ans=(ans+(fact[n-i-1]*sum)%mod)%mod;
+	    update(a[i],-1);
+	}
+	return ans;
 }
 
 int main()
 {
 	FastIO
 	vector<ll> a{4, 4, 2, 2, 1};
-    cout<<getRank(a)<<"\n";
+    cout<<getRankWithRepetition(a)<<"\n";
+    vector<ll> b{5, 4, 3, 1, 2};
+    cout<<getRankWithoutRepetition(b)<<"\n";
 	return 0;
 }
